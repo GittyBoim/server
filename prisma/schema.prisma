@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums for PostgreSQL
+
+enum UserRole {
+  USER
+  COMPANY
+  SUPER_ADMIN
+}
+
+enum CompanyType {
+  BUSINESS
+  NON_PROFIT
+  GOVERNMENT
+}
+
+enum ItemStatus {
+  UNASSIGNED
+  ASSIGNED
+  LOST
+  FOUND
+  RETURNED
+}
+
+enum NotificationType {
+  ITEM_ASSIGNED
+  ITEM_LOST
+  ITEM_FOUND
+  ITEM_RETURNED
+  SYSTEM_ALERT
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  EXPIRED
+}
+
+model User {
+  id             String           @id @default(cuid())
+  name           String
+  email          String           @unique
+  phone          String?
+  password       String
+  role           UserRole         @default(USER)
+  companyId      String?          // Only set for COMPANY role users
+  createdAt      DateTime         @default(now())
+  company        Company?         @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  items          Item[]
+  notifications  Notification[]
+}
+
+model Company {
+  id             String           @id @default(cuid())
+  name           String
+  type           CompanyType      @default(BUSINESS)
+  address        String?
+  phone          String?
+  email          String?
+  createdAt      DateTime         @default(now())
+  items          Item[]
+  users          User[]           // Company users assigned to this company
+  subscriptions  Subscription[]
+}
+
+model Item {
+  id             String           @id @default(cuid())
+  serialNumber   String           @unique
+  name           String?
+  description    String?
+  status         ItemStatus       @default(UNASSIGNED)
+  companyId      String
+  ownerId        String?
+  createdAt      DateTime         @default(now())
+  company        Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  owner          User?            @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  scans          Scan[]
+  notifications  Notification[]
+}
+
+model Scan {
+  id             String           @id @default(cuid())
+  itemId         String
+  scannedBy      String?
+  location       String?
+  scannedAt      DateTime         @default(now())
+  item           Item             @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id             String           @id @default(cuid())
+  userId         String
+  itemId         String?
+  type           NotificationType
+  message        String
+  read           Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item           Item?            @relation(fields: [itemId], references: [id])
+}
+
+model Subscription {
+  id             String           @id @default(cuid())
+  companyId      String
+  plan           SubscriptionPlan
+  status         SubscriptionStatus @default(ACTIVE)
+  startDate      DateTime         @default(now())
+  endDate        DateTime?
+  company        Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
