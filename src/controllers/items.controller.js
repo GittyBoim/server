@@ -21,7 +21,7 @@ class ItemsController {
 
   async createBulkItems(req, res) {
     try {
-      const { companyId, count } = req.body;
+      const { companyId, count, name, description } = req.body;
 
       if (!companyId) {
         return res.status(400).json({ error: 'Company ID is required' });
@@ -31,7 +31,7 @@ class ItemsController {
         return res.status(400).json({ error: 'Count must be between 1 and 100' });
       }
 
-      const serialNumbers = await itemsService.createBulkItems(companyId, count);
+      const serialNumbers = await itemsService.createBulkItems(companyId, count, name, description);
       res.status(201).json({
         serialNumbers,
         qrUrls: serialNumbers.map(serial => `https://yourdomain.com/scan/${serial}`),

@@ -34,7 +34,7 @@ async function createItem(companyId, name, description) {
   return item;
 }
 
-async function createBulkItems(companyId, count) {
+async function createBulkItems(companyId, count, name, description) {
   
   const company = await prisma.company.findUnique({
     where: { id: companyId },
@@ -50,6 +50,8 @@ async function createBulkItems(companyId, count) {
     items.push({
       serialNumber,
       companyId,
+      name,
+      description,
       status: 'UNASSIGNED',
     });
   }
