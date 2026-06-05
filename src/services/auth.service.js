@@ -31,7 +31,7 @@ async function registerUser(userData) {
   
   // Generate token
   const token = jwt.sign(
-    { userId: user.id, email: user.email, role: user.role },
+    { userId: user.id, email: user.email, name: user.name, role: user.role },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
   );
@@ -93,7 +93,7 @@ async function createUserAsAdmin(userData) {
   
   // Generate token
   const token = jwt.sign(
-    { userId: user.id, email: user.email, role: user.role, companyId: user.companyId },
+    { userId: user.id, email: user.email, name: user.name, role: user.role, companyId: user.companyId },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
   );
@@ -132,7 +132,7 @@ async function loginUser(credentials) {
   
   // Generate token
   const token = jwt.sign(
-    { userId: user.id, email: user.email, role: user.role, companyId: user.companyId },
+    { userId: user.id, email: user.email, name: user.name, role: user.role, companyId: user.companyId },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
   );
